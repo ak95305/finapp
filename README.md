@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js + Google Sheets CRUD Boilerplate
 
-## Getting Started
+A fully-typed, reusable CRUD starter using **Next.js 15 App Router**, **TypeScript**, **Tailwind CSS**, **Google Sheets** as storage, and **Google Apps Script** as the API layer. Deployable on Vercel with zero backend infrastructure.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Setup
+
+### 1. Google Sheet
+
+Create a Google Sheet and add a tab named **Items** with these column headers in row 1:
+
+```
+id | name | description | status | amount | email | createdAt | updatedAt
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Google Apps Script
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Open the sheet → **Extensions → Apps Script**
+2. Paste the contents of `apps-script/Code.gs` and `apps-script/appsscript.json`
+3. Deploy → **New deployment** → **Web app**
+   - Execute as: **Me**
+   - Who has access: **Anyone**
+4. Copy the deployment URL
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Environment
 
-## Learn More
+```bash
+cp .env.example .env.local
+# Edit .env.local and set:
+NEXT_PUBLIC_APPS_SCRIPT_URL=https://script.google.com/macros/s/YOUR_ID/exec
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Run
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm install
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Folder structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+├── app/
+│   ├── layout.tsx              # Root layout with Navbar
+│   ├── page.tsx                # Home / quick-start guide
+│   └── items/
+│       ├── page.tsx            # List page
+│       ├── new/page.tsx        # Create page
+│       └── [id]/
+│           ├── page.tsx        # Detail page
+│           └── edit/page.tsx   # Edit page
+├── components/
+│   ├── layout/
+│   │   └── Navbar.tsx
+│   └── ui/
+│       ├── Badge.tsx
+│       ├── Button.tsx
+│       ├── Card.tsx
+│       ├── DataTable.tsx       # Sortable table with row actions
+│       ├── EmptyState.tsx
+│       ├── ErrorMessage.tsx
+│       ├── Form.tsx            # Config-driven form
+│       ├── Input.tsx           # Input / Textarea / Select
+│       └── Modal.tsx           # Modal + ConfirmModal
+├── hooks/
+│   ├── use-async.ts            # Single-operation async state
+│   ├── use-crud.ts             # Full list CRUD state
+│   └── use-record.ts           # Single-record fetch
+├── services/
+│   ├── api-client.ts           # createApiClient<TRecord, TCreate>(sheet)
+│   └── items.ts                # itemsService — swap for your domain
+├── types/
+│   └── index.ts                # BaseRecord, Item, FieldConfig, TableColumn…
+├── lib/
+│   ├── config.ts               # env vars
+│   └── utils.ts                # cn, formatDate, formatCurrency, …
+└── apps-script/
+    ├── Code.gs                 # GET/POST handler — getAll/getById/create/update/delete
+    └── appsscript.json
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Adapting to a new domain
+
+1. Add your type to `types/index.ts` extending `BaseRecord`
+2. Create `services/your-resource.ts` calling `createApiClient<YourType, CreateInput>("SheetTabName")`
+3. Define `FieldConfig[]` for your form fields
+4. Copy the `items` pages into `app/your-resource/` and swap the service + fields
+
+---
+
+## Deployment (Vercel)
+
+```bash
+vercel deploy
+# Add NEXT_PUBLIC_APPS_SCRIPT_URL in Vercel project settings → Environment Variables
+```
