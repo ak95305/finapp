@@ -17,7 +17,7 @@ export function FAB({ onClick, icon, label, className }: FABProps) {
       style={{ right: "max(1rem, calc((100vw - 430px) / 2 + 1rem))" }}
       className={cn(
         "fixed bottom-20 z-40",
-        "flex items-center gap-2 rounded-2xl shadow-lg shadow-blue-500/25",
+        "flex items-center justify-center gap-2 rounded-2xl shadow-lg shadow-blue-500/25",
         "bg-blue-600 text-white",
         "active:scale-95 transition-transform",
         "h-14",
